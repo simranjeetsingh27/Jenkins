@@ -10,11 +10,11 @@
 
 #### We have Made a Script and using that script we are going to implement and run the script.
 
-![](Capture1.png)
+![](Capture1.PNG)
 
 #### Now we have build our pipeline and run the pipeline. Now the Artifact file.txt is shows in the upper part. Now Showing the file.txt Content.
 
-![](Capture2.png)
+![](Capture2.PNG)
 
 ### BOOM !! All the Packages has been listed.
 
@@ -22,15 +22,15 @@
 
 ##### We have to pass the parameter in our job as given below.
 
-![](Capture3.png)
+![](Capture3.PNG)
 
 ##### We have to Choose one choice. In our case i have choose validate.
 
-![](Capture4.png)
+![](Capture4.PNG)
 
 Now showing you the magic in the Snagit below.
 
-![](Capture4.png)
+![](Capture4.PNG)
 
 ## BOOM !! OUR script Rocks.
 
