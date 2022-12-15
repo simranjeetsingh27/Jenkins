@@ -1,0 +1,39 @@
+pipeline {
+    agent any
+
+    stages {
+        
+        stage('Cleaning the Workspace') {
+            steps {
+                step([$class: 'WsCleanup'])
+            }
+        }
+        
+        stage('git_clone') {
+            steps {
+                git branch: 'development', credentialsId: 'git_jenkins', url: 'http://100.97.0.8/gitlab-instance-27e0deb1/mpassportseva.git'
+            }
+        }
+        
+        
+           
+       
+        stage('docker image') {
+            steps {
+                sh"sudo docker rm -f mpassport"
+                sh"sudo docker rmi -f mpassport"
+                sh"sudo docker build . -t mpassport"
+                
+            }
+        }
+        stage('Deploying App') {
+            steps {
+                sh"sudo docker run --name mpassport -itd -p 3006:3006 mpassport"
+            }
+        }
+        
+        
+    }
+}
+
+
