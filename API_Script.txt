@@ -1,0 +1,132 @@
+def COMMIT_ID
+def DOCKER_IMAGE_NAME
+def ARTIFACT_VERSION
+pipeline {
+    agent any
+    parameters {
+        choice(name: 'ENV', choices: ['dev'], description: 'Choose Environment Name')
+        choice(name: 'MODULE', choices: ['eqmsdisplay'], description: 'Choose module to build')
+        string(name: 'BRANCH', defaultValue: 'master', description: 'Git Branch Name')
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+        timestamps()
+        disableConcurrentBuilds()
+    }
+    environment {
+        DEFAULT_BRANCH = "master"
+        GIT_CREDENTIAL = ""
+        GIT_URL = "http://100.97.0.8"
+    }
+    stages {
+        
+        stage('Cleaning the Workspace') {
+            steps {
+                step([$class: 'WsCleanup'])
+            }
+        }
+        stage('Pulling the Repository') {
+            steps {
+                echo "Branch: ${params.BRANCH}"
+                echo "Environment: ${params.ENV}"
+                script {
+                    def BRANCH_NAME = ""
+                    if (params.BRANCH == null || params.BRANCH.equals("null")) {
+                        BRANCH_NAME = "${env.DEFAULT_BRANCH}"
+                    } else {
+                        BRANCH_NAME = "${params.BRANCH}"
+                    }
+                    git branch: "${BRANCH_NAME}", url: "${env.GIT_URL}", changelog: true, poll: true, credentialsId: "${env.GIT_CREDENTIAL}"
+                }
+            }
+        }
+        
+        
+        stage('Setting up the Environments') {
+            steps {
+                script {
+                    COMMIT_ID = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
+                    ARTIFACT_VERSION = "${BUILD_NUMBER}-${COMMIT_ID}"
+                    DOCKER_IMAGE_NAME = "${params.MODULE}"
+                    println("========================================================================")
+                    println("ARTIFACT_VERSION: " + ARTIFACT_VERSION)
+                    println("DOCKER_IMAGE_NAME: " + DOCKER_IMAGE_NAME)
+                    println("COMMIT_ID: " + COMMIT_ID)
+                    println("========================================================================")
+
+                    
+                }
+            }
+        }
+		stage('Building the Artifacts') {
+           
+            steps {
+                script {
+                    sh """#!/bin/bash
+                        set -xe
+                        echo $WORKSPACE
+                        cp /PSP-Doc/Dockerfile/Dockerfile .
+                        /usr/share/maven/bin/mvn clean package install
+                        if [ \$? -eq 0 ];
+                        then
+                            echo "Successfully jar build"
+                        else
+                            echo "Error in building jar"
+                            exit 1
+                        fi
+                    """
+                }
+            }
+        }
+        stage('Docker Image ') {
+            steps {
+                script {
+                    sh """
+                        echo "Docker Image "
+                        echo "current working directory `pwd`"
+                        sudo docker rm -f ${DOCKER_IMAGE_NAME}
+                        sudo docker rmi -f ${DOCKER_IMAGE_NAME}
+                        sudo docker build -f Dockerfile --build-arg artifact_version="${ARTIFACT_VERSION}" -t "${DOCKER_IMAGE_NAME}" .
+                        
+                        
+
+                        if [ \$? -eq 0 ]
+                        then
+                            echo "Successfully image tagged and pushed to repository"
+                            echo ${DOCKER_IMAGE_NAME} > $WORKSPACE/image_id
+                            cat $WORKSPACE/image_id
+                        else
+                            echo "Error in tagging/pushing image"
+                            exit 1
+                        fi
+                    """
+                }
+            }
+        }
+		
+        stage('Deploying App') {
+            steps {
+                script {
+                    sh """
+                        echo "Docker container"
+                        echo "current working directory `pwd`"
+                        sudo docker run --name ${DOCKER_IMAGE_NAME} -itd -p 3031:3031 ${DOCKER_IMAGE_NAME}
+                        
+                        
+
+                        if [ \$? -eq 0 ]
+                        then
+                            echo "Successfully container run"
+                            
+                        else
+                            echo "Error in container "
+                            exit 1
+                        fi
+                    """
+                }
+            }
+        }
+
+
+    }
+}
