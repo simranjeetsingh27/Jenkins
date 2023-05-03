@@ -10,7 +10,7 @@ pipeline{
                 }            
             }
         }
-        stage("Code compile and Quality"){
+        stage("Code Compile and Quality"){
             steps{
                 script{
                 mavengoals.compile()
