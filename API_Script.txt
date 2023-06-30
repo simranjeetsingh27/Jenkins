@@ -5,7 +5,7 @@ pipeline {
     agent any
     parameters {
         choice(name: 'ENV', choices: ['dev'], description: 'Choose Environment Name')
-        choice(name: 'MODULE', choices: ['eqmsdisplay'], description: 'Choose module to build')
+        choice(name: 'MODULE', choices: ['project_name'], description: 'Choose module to build')
         string(name: 'BRANCH', defaultValue: 'master', description: 'Git Branch Name')
     }
     options {
