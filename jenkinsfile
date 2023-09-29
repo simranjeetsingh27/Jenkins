@@ -1,6 +1,6 @@
 @Library("shared-library@main") _
 pipeline{
-    agent {label 'slaname'}
+    agent {label 'slavename'}
     stages{
         
         stage("clone"){
