@@ -4,7 +4,7 @@ def ARTIFACT_VERSION
 pipeline {
     agent any
     parameters {
-        choice(name: 'ENV', choices: ['dev'], description: 'Choose Environment Name')
+        choice(name: 'ENV', choices: ['dev'], description: 'Choose Env Name')
         choice(name: 'MODULE', choices: ['project_name'], description: 'Choose module to build')
         string(name: 'BRANCH', defaultValue: 'main', description: 'Git Branch Name')
     }
