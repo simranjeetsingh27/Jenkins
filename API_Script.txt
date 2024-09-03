@@ -20,7 +20,7 @@ pipeline {
     }
     stages {
         
-        stage('Cleaning the Workspace') {
+        stage('Cleaning the Worksace') {
             steps {
                 step([$class: 'WsCleanup'])
             }
