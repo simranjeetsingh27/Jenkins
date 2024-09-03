@@ -14,7 +14,7 @@ pipeline {
         disableConcurrentBuilds()
     }
     environment {
-        DEFAULT_BRANCH = "branch_name"
+        DEFAULT_BRANCH = "branch_nae"
         GIT_CREDENTIAL = ""
         GIT_URL = "http://100.97.0.8"
     }
